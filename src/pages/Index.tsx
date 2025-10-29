@@ -2,136 +2,272 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 
-interface Car {
+interface Portfolio {
   id: number;
-  brand: string;
-  model: string;
-  price: number;
-  gtaPrice: number;
-  speed: number;
-  acceleration: number;
-  handling: number;
+  title: string;
+  style: string;
   image: string;
-  class: string;
 }
 
-const cars: Car[] = [
-  { id: 1, brand: 'Lamborghini', model: 'Aventador', price: 450000, gtaPrice: 2500000, speed: 350, acceleration: 95, handling: 88, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/a5d6321e-6543-40c0-88b1-f5e7372b8068.jpg', class: 'Super' },
-  { id: 2, brand: 'Porsche', model: '911 Turbo S', price: 220000, gtaPrice: 1800000, speed: 330, acceleration: 92, handling: 94, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/e0c20a34-8502-4260-980e-da36315beb84.jpg', class: 'Sports' },
-  { id: 3, brand: 'Mercedes-Benz', model: 'AMG GT R', price: 180000, gtaPrice: 1500000, speed: 318, acceleration: 88, handling: 90, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/e0c20a34-8502-4260-980e-da36315beb84.jpg', class: 'Sports' },
-  { id: 4, brand: 'BMW', model: 'M8 Competition', price: 150000, gtaPrice: 1200000, speed: 305, acceleration: 85, handling: 87, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/e0c20a34-8502-4260-980e-da36315beb84.jpg', class: 'Sports' },
-  { id: 5, brand: 'Ferrari', model: 'F8 Tributo', price: 280000, gtaPrice: 2000000, speed: 340, acceleration: 93, handling: 92, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/4a9fcdb3-874b-4c7d-8967-0dc8f58a0cce.jpg', class: 'Super' },
-  { id: 6, brand: 'McLaren', model: '720S', price: 300000, gtaPrice: 2200000, speed: 341, acceleration: 94, handling: 91, image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/a5d6321e-6543-40c0-88b1-f5e7372b8068.jpg', class: 'Super' },
+interface PricingTier {
+  id: number;
+  name: string;
+  price: number;
+  features: string[];
+  popular?: boolean;
+}
+
+const portfolio: Portfolio[] = [
+  { id: 1, title: 'Портрет в масле', style: 'Классика', image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/8b506e0c-79ab-405d-ac5f-b9a1aa21347e.jpg' },
+  { id: 2, title: 'Абстракция', style: 'Современное', image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/b0304e28-5206-4af2-9754-79ec22a7f68a.jpg' },
+  { id: 3, title: 'Акварель', style: 'Нежность', image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/fae34049-9658-4936-adb0-1b667de37f89.jpg' },
+  { id: 4, title: 'Поп-арт', style: 'Яркость', image: 'https://cdn.poehali.dev/projects/e4360abc-69b5-4a85-b2a2-edafb664f459/files/10d3a2dd-ad28-4493-88a6-4f3ca065db63.jpg' },
+];
+
+const pricing: PricingTier[] = [
+  { 
+    id: 1, 
+    name: 'Базовый', 
+    price: 100, 
+    features: ['Цифровой скетч', 'Базовая обработка', '1 правка', 'Срок: 3 дня']
+  },
+  { 
+    id: 2, 
+    name: 'Стандарт', 
+    price: 2500, 
+    features: ['Детальная обработка', 'Выбор стиля', '3 правки', 'Срок: 5 дней', 'Печать A4'], 
+    popular: true 
+  },
+  { 
+    id: 3, 
+    name: 'Премиум', 
+    price: 10000, 
+    features: ['Ручная работа маслом', 'Холст 50x70 см', 'Неограниченные правки', 'Срок: 14 дней', 'Доставка по РФ']
+  },
+  { 
+    id: 4, 
+    name: 'Люкс', 
+    price: 40000, 
+    features: ['Холст 100x150 см', 'Музейное качество', 'Консультация художника', 'Срок: 30 дней', 'Рама в подарок', 'Доставка worldwide']
+  },
 ];
 
 export default function Index() {
-  const [activeSection, setActiveSection] = useState<'home' | 'catalog' | 'garage'>('home');
-  const [garage, setGarage] = useState<Car[]>([]);
-  const [currency, setCurrency] = useState<'usd' | 'gta'>('usd');
+  const [activeSection, setActiveSection] = useState<'home' | 'portfolio' | 'upload' | 'pricing' | 'about' | 'contact'>('home');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
-  const addToGarage = (car: Car) => {
-    if (!garage.find(c => c.id === car.id)) {
-      setGarage([...garage, car]);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploadedFile(e.target.files[0]);
     }
-  };
-
-  const repairCar = (carId: number) => {
-    console.log(`Ремонт авто #${carId} выполнен бесплатно!`);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              GTA 6 AUTO
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+              ArtStudio
             </h1>
             <div className="flex gap-6">
-              <button
-                onClick={() => setActiveSection('home')}
-                className={`flex items-center gap-2 transition-colors ${
-                  activeSection === 'home' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon name="Home" size={20} />
-                Главная
-              </button>
-              <button
-                onClick={() => setActiveSection('catalog')}
-                className={`flex items-center gap-2 transition-colors ${
-                  activeSection === 'catalog' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon name="Car" size={20} />
-                Каталог
-              </button>
-              <button
-                onClick={() => setActiveSection('garage')}
-                className={`flex items-center gap-2 transition-colors ${
-                  activeSection === 'garage' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon name="Warehouse" size={20} />
-                Гараж
-                {garage.length > 0 && (
-                  <Badge variant="secondary" className="ml-1">{garage.length}</Badge>
-                )}
-              </button>
+              {[
+                { id: 'home', label: 'Главная', icon: 'Home' },
+                { id: 'portfolio', label: 'Портфолио', icon: 'Image' },
+                { id: 'upload', label: 'Загрузить', icon: 'Upload' },
+                { id: 'pricing', label: 'Тарифы', icon: 'DollarSign' },
+                { id: 'about', label: 'О нас', icon: 'Users' },
+                { id: 'contact', label: 'Контакты', icon: 'Mail' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id as any)}
+                  className={`flex items-center gap-2 transition-colors ${
+                    activeSection === item.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon name={item.icon as any} size={18} />
+                  <span className="hidden md:inline">{item.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </nav>
 
       {activeSection === 'home' && (
-        <div className="container mx-auto px-4 py-16 animate-fade-in">
-          <div className="text-center mb-16">
-            <h2 className="text-6xl font-extrabold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-scale-in">
-              Премиум автомобили
-            </h2>
+        <div className="container mx-auto px-4 py-20 animate-fade-in">
+          <div className="text-center max-w-4xl mx-auto mb-16">
+            <div className="mb-6 relative">
+              <h2 className="text-7xl font-bold mb-4 relative z-10">
+                Превратим ваше фото
+                <br />
+                <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                  в произведение искусства
+                </span>
+              </h2>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10"></div>
+            </div>
             <p className="text-xl text-muted-foreground mb-8">
-              Покупайте легендарные машины за реальные деньги или игровую валюту
+              От цифрового скетча за 100₽ до эксклюзивного холста за 40 000₽
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90" onClick={() => setActiveSection('catalog')}>
-                <Icon name="Zap" size={20} className="mr-2" />
-                Смотреть каталог
+              <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90" onClick={() => setActiveSection('upload')}>
+                <Icon name="Upload" size={20} className="mr-2" />
+                Загрузить фото
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setActiveSection('garage')}>
-                <Icon name="Warehouse" size={20} className="mr-2" />
-                Мой гараж
+              <Button size="lg" variant="outline" onClick={() => setActiveSection('portfolio')}>
+                <Icon name="Image" size={20} className="mr-2" />
+                Посмотреть работы
               </Button>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {cars.slice(0, 3).map((car, idx) => (
-              <Card key={car.id} className="overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105 animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
-                <div className="h-48 overflow-hidden">
-                  <img src={car.image} alt={car.model} className="w-full h-full object-cover" />
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {[
+              { icon: 'Palette', title: 'Любой стиль', desc: 'От классики до поп-арта' },
+              { icon: 'Clock', title: 'Быстро', desc: 'От 3 до 30 дней' },
+              { icon: 'Award', title: 'Качество', desc: 'Профессиональные художники' },
+            ].map((feature, idx) => (
+              <Card key={idx} className="text-center hover:shadow-lg transition-shadow animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
+                    <Icon name={feature.icon as any} size={32} className="text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl">{feature.title}</CardTitle>
+                  <CardDescription className="text-base">{feature.desc}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'portfolio' && (
+        <div className="container mx-auto px-4 py-12 animate-fade-in">
+          <h2 className="text-5xl font-bold text-center mb-12">Наши работы</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {portfolio.map((work) => (
+              <Card key={work.id} className="overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+                <div className="h-64 overflow-hidden">
+                  <img src={work.image} alt={work.title} className="w-full h-full object-cover" />
                 </div>
                 <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge className="bg-primary/20 text-primary">{car.class}</Badge>
-                    <Badge variant="outline">{car.brand}</Badge>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl">{work.title}</CardTitle>
+                    <Badge variant="secondary">{work.style}</Badge>
                   </div>
-                  <CardTitle className="text-2xl">{car.model}</CardTitle>
-                  <CardDescription>Максимальная скорость: {car.speed} км/ч</CardDescription>
                 </CardHeader>
-                <CardFooter className="flex-col gap-2">
-                  <div className="flex gap-2 w-full text-sm">
-                    <div className="flex-1 text-center">
-                      <div className="text-muted-foreground">💵 ${car.price.toLocaleString()}</div>
-                    </div>
-                    <div className="flex-1 text-center">
-                      <div className="text-secondary">💰 {car.gtaPrice.toLocaleString()} GTA$</div>
-                    </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'upload' && (
+        <div className="container mx-auto px-4 py-12 animate-fade-in">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-5xl font-bold text-center mb-4">Загрузите ваше фото</h2>
+            <p className="text-center text-muted-foreground mb-12">Мы превратим его в уникальное произведение искусства</p>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Форма заказа</CardTitle>
+                <CardDescription>Заполните детали для создания вашей работы</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="photo">Ваше фото</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                    <input
+                      id="photo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <label htmlFor="photo" className="cursor-pointer">
+                      <Icon name="Upload" size={48} className="mx-auto text-muted-foreground mb-4" />
+                      <p className="text-sm text-muted-foreground">
+                        {uploadedFile ? uploadedFile.name : 'Нажмите для выбора файла'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">JPG, PNG до 10MB</p>
+                    </label>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90" onClick={() => addToGarage(car)}>
-                    Купить сейчас
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name">Ваше имя</Label>
+                  <Input id="name" placeholder="Иван Иванов" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" placeholder="ivan@example.com" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="style">Желаемый стиль</Label>
+                  <Input id="style" placeholder="Например: акварель, масло, поп-арт" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="comments">Комментарии</Label>
+                  <Textarea id="comments" placeholder="Расскажите о ваших пожеланиях..." />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90" size="lg">
+                  <Icon name="Send" size={20} className="mr-2" />
+                  Отправить заказ
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'pricing' && (
+        <div className="container mx-auto px-4 py-12 animate-fade-in">
+          <h2 className="text-5xl font-bold text-center mb-4">Тарифы</h2>
+          <p className="text-center text-muted-foreground mb-12">Выберите подходящий вариант</p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {pricing.map((tier) => (
+              <Card key={tier.id} className={`relative hover:shadow-2xl transition-all ${tier.popular ? 'border-2 border-primary shadow-xl scale-105' : ''}`}>
+                {tier.popular && (
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent">
+                    Популярный
+                  </Badge>
+                )}
+                <CardHeader>
+                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold">{tier.price.toLocaleString()}₽</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Icon name="Check" size={18} className="text-primary mt-1 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className={`w-full ${tier.popular ? 'bg-gradient-to-r from-primary to-accent' : ''}`}
+                    variant={tier.popular ? 'default' : 'outline'}
+                    onClick={() => setActiveSection('upload')}
+                  >
+                    Выбрать
                   </Button>
                 </CardFooter>
               </Card>
@@ -140,226 +276,84 @@ export default function Index() {
         </div>
       )}
 
-      {activeSection === 'catalog' && (
-        <div className="container mx-auto px-4 py-8 animate-fade-in">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-4xl font-bold">Каталог автомобилей</h2>
-              <Tabs value={currency} onValueChange={(v) => setCurrency(v as 'usd' | 'gta')}>
-                <TabsList>
-                  <TabsTrigger value="usd">💵 USD</TabsTrigger>
-                  <TabsTrigger value="gta">💰 GTA$</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="all">Все</TabsTrigger>
-                <TabsTrigger value="super">Super</TabsTrigger>
-                <TabsTrigger value="sports">Sports</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="all" className="mt-0">
-                <div className="grid md:grid-cols-3 gap-6">
-                  {cars.map((car) => (
-                    <Card key={car.id} className="overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105">
-                      <div className="h-48 overflow-hidden">
-                        <img src={car.image} alt={car.model} className="w-full h-full object-cover" />
+      {activeSection === 'about' && (
+        <div className="container mx-auto px-4 py-12 animate-fade-in">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-5xl font-bold text-center mb-8">О нас</h2>
+            <Card>
+              <CardContent className="pt-6 space-y-6">
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  ArtStudio — это команда профессиональных художников, которые превращают обычные фотографии в настоящие произведения искусства.
+                </p>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  За 5 лет работы мы создали более 10 000 уникальных работ для клиентов по всему миру. Каждая работа выполняется с душой и вниманием к деталям.
+                </p>
+                <div className="grid md:grid-cols-3 gap-8 pt-8">
+                  {[
+                    { number: '10 000+', label: 'Работ создано' },
+                    { number: '50+', label: 'Художников' },
+                    { number: '5 лет', label: 'На рынке' },
+                  ].map((stat, idx) => (
+                    <div key={idx} className="text-center">
+                      <div className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+                        {stat.number}
                       </div>
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge className="bg-primary/20 text-primary">{car.class}</Badge>
-                          <Badge variant="outline">{car.brand}</Badge>
-                        </div>
-                        <CardTitle>{car.model}</CardTitle>
-                        <CardDescription>
-                          <div className="flex items-center gap-4 mt-2 text-xs">
-                            <div className="flex items-center gap-1">
-                              <Icon name="Gauge" size={14} />
-                              {car.speed} км/ч
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Zap" size={14} />
-                              {car.acceleration}/100
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Crosshair" size={14} />
-                              {car.handling}/100
-                            </div>
-                          </div>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardFooter className="flex-col gap-2">
-                        <div className="text-2xl font-bold text-center w-full">
-                          {currency === 'usd' ? (
-                            <span className="text-primary">${car.price.toLocaleString()}</span>
-                          ) : (
-                            <span className="text-secondary">{car.gtaPrice.toLocaleString()} GTA$</span>
-                          )}
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90" onClick={() => addToGarage(car)}>
-                          <Icon name="ShoppingCart" size={18} className="mr-2" />
-                          Купить
-                        </Button>
-                      </CardFooter>
-                    </Card>
+                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    </div>
                   ))}
                 </div>
-              </TabsContent>
-
-              <TabsContent value="super" className="mt-0">
-                <div className="grid md:grid-cols-3 gap-6">
-                  {cars.filter(car => car.class === 'Super').map((car) => (
-                    <Card key={car.id} className="overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105">
-                      <div className="h-48 overflow-hidden">
-                        <img src={car.image} alt={car.model} className="w-full h-full object-cover" />
-                      </div>
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge className="bg-primary/20 text-primary">{car.class}</Badge>
-                          <Badge variant="outline">{car.brand}</Badge>
-                        </div>
-                        <CardTitle>{car.model}</CardTitle>
-                        <CardDescription>
-                          <div className="flex items-center gap-4 mt-2 text-xs">
-                            <div className="flex items-center gap-1">
-                              <Icon name="Gauge" size={14} />
-                              {car.speed} км/ч
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Zap" size={14} />
-                              {car.acceleration}/100
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Crosshair" size={14} />
-                              {car.handling}/100
-                            </div>
-                          </div>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardFooter className="flex-col gap-2">
-                        <div className="text-2xl font-bold text-center w-full">
-                          {currency === 'usd' ? (
-                            <span className="text-primary">${car.price.toLocaleString()}</span>
-                          ) : (
-                            <span className="text-secondary">{car.gtaPrice.toLocaleString()} GTA$</span>
-                          )}
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90" onClick={() => addToGarage(car)}>
-                          <Icon name="ShoppingCart" size={18} className="mr-2" />
-                          Купить
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="sports" className="mt-0">
-                <div className="grid md:grid-cols-3 gap-6">
-                  {cars.filter(car => car.class === 'Sports').map((car) => (
-                    <Card key={car.id} className="overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105">
-                      <div className="h-48 overflow-hidden">
-                        <img src={car.image} alt={car.model} className="w-full h-full object-cover" />
-                      </div>
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge className="bg-primary/20 text-primary">{car.class}</Badge>
-                          <Badge variant="outline">{car.brand}</Badge>
-                        </div>
-                        <CardTitle>{car.model}</CardTitle>
-                        <CardDescription>
-                          <div className="flex items-center gap-4 mt-2 text-xs">
-                            <div className="flex items-center gap-1">
-                              <Icon name="Gauge" size={14} />
-                              {car.speed} км/ч
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Zap" size={14} />
-                              {car.acceleration}/100
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Icon name="Crosshair" size={14} />
-                              {car.handling}/100
-                            </div>
-                          </div>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardFooter className="flex-col gap-2">
-                        <div className="text-2xl font-bold text-center w-full">
-                          {currency === 'usd' ? (
-                            <span className="text-primary">${car.price.toLocaleString()}</span>
-                          ) : (
-                            <span className="text-secondary">{car.gtaPrice.toLocaleString()} GTA$</span>
-                          )}
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90" onClick={() => addToGarage(car)}>
-                          <Icon name="ShoppingCart" size={18} className="mr-2" />
-                          Купить
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
 
-      {activeSection === 'garage' && (
-        <div className="container mx-auto px-4 py-8 animate-fade-in">
-          <h2 className="text-4xl font-bold mb-8">Мой гараж</h2>
-          {garage.length === 0 ? (
-            <div className="text-center py-16">
-              <Icon name="Warehouse" size={80} className="mx-auto text-muted-foreground mb-4" />
-              <p className="text-xl text-muted-foreground mb-4">Ваш гараж пуст</p>
-              <Button onClick={() => setActiveSection('catalog')}>
-                <Icon name="Car" size={18} className="mr-2" />
-                Перейти в каталог
-              </Button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {garage.map((car) => (
-                <Card key={car.id} className="overflow-hidden">
-                  <div className="h-48 overflow-hidden">
-                    <img src={car.image} alt={car.model} className="w-full h-full object-cover" />
+      {activeSection === 'contact' && (
+        <div className="container mx-auto px-4 py-12 animate-fade-in">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-5xl font-bold text-center mb-8">Контакты</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon name="Mail" size={24} className="text-primary" />
                   </div>
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-primary/20 text-primary">{car.class}</Badge>
-                      <Badge variant="outline">{car.brand}</Badge>
-                    </div>
-                    <CardTitle>{car.model}</CardTitle>
-                    <CardDescription>
-                      <div className="flex items-center gap-4 mt-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <Icon name="Gauge" size={14} />
-                          {car.speed} км/ч
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon name="Zap" size={14} />
-                          {car.acceleration}/100
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon name="Crosshair" size={14} />
-                          {car.handling}/100
-                        </div>
-                      </div>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex-col gap-2">
-                    <Button variant="outline" className="w-full" onClick={() => repairCar(car.id)}>
-                      <Icon name="Wrench" size={18} className="mr-2" />
-                      Бесплатный ремонт
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+                  <CardTitle>Email</CardTitle>
+                  <CardDescription className="text-base">info@artstudio.ru</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon name="Phone" size={24} className="text-primary" />
+                  </div>
+                  <CardTitle>Телефон</CardTitle>
+                  <CardDescription className="text-base">+7 (999) 123-45-67</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon name="MessageCircle" size={24} className="text-primary" />
+                  </div>
+                  <CardTitle>Telegram</CardTitle>
+                  <CardDescription className="text-base">@artstudio_ru</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon name="Instagram" size={24} className="text-primary" />
+                  </div>
+                  <CardTitle>Instagram</CardTitle>
+                  <CardDescription className="text-base">@artstudio_official</CardDescription>
+                </CardHeader>
+              </Card>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
